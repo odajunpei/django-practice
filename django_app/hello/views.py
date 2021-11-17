@@ -1,24 +1,23 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from django.views.generic import TemplateView
-from .forms import HelloForm
+from .models import Friend
+from django.db.models import QuerySet
 
-class HelloView(TemplateView):
+def __new_str__(self):
+  result = ''
+  for item in self:
+    result += '<tr>'
+    for k in item:
+      result += '<td>' + str(k) + '=' + str(item[k]) + '</td>'
+    result += '<tr>'
+  return result
 
-  def __init__(self):
-    self.params = {
-      'title': 'Hello',
-      'form': HelloForm(),
-      'result':None
-    }
+QuerySet. __str__ = __new_str__
 
-    def get(self, request):
-      return render(request, 'hello/index.html', self.params)
-
-    def post(self, request):
-      if ('check' in request.POST):
-        self.params['result'] = 'Checked!!'
-      else:
-        self.params['result'] = 'not checked...'
-      self.params['form'] = HelloForm(request.POST)
-      return render(request, 'hello/index.html', self.params)
+def index(request):
+  data = Friend.objects.all().values('id', 'name', 'age')
+  params = {
+    'title': 'Hello',
+    'data': data,
+  }
+  return render(request, 'hello/index.html', params)
